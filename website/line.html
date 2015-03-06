@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+    <title>Line Chart</title>
+    <script src="Chart.min.js"></script>
+    <script src="LinechartDataProcessor.js"></script>
+    <script src=https://code.jquery.com/jquery-2.1.1.min.js></script>
+</head>
+<body>
+<h4>http://<input type="text" id="host"/></h4>
+<button onclick = getRoads()>haal wegen op</button>
+<select id="roadSelection">
+
+</select>
+<button onclick=refresh()>ververs</button>
+<div style="width:30%">
+    <div>
+        <canvas id="canvas" height="450" width="600"></canvas>
+    </div>
+</div>
+<div style="width:30%">
+    <div>
+        <canvas id="canvas2" height="450" width="600"></canvas>
+    </div>
+</div>
+
+
+<script>
+
+    function createCharts(url) {
+        $.get(url, function(data) {
+            var ChartObject = handleRawData(data);
+
+            $("#canvas").replaceWith('<canvas id="canvas" height="450" width="600"></canvas>');
+            $("#canvas2").replaceWith('<canvas id="canvas2" height="450" width="600"></canvas>');
+
+            var ctx = document.getElementById("canvas").getContext("2d");
+            window.myLine = new Chart(ctx).Line(ChartObject.travelTimeChart);
+
+            var ctx = document.getElementById("canvas2").getContext("2d");
+            window.myLine = new Chart(ctx).Line(ChartObject.velocityChart);
+        });
+    }
+
+
+    function refresh() {
+        var name = $("#roadSelection :selected").val();
+        var host = $("#host").val();
+        createCharts(createUrl(host , name));
+    }
+
+
+    function getRoads() {
+        var url =  "http://" + $("#host").val() + "/database";
+
+        $.get(url, function(data) {
+            var roads = getRoadsFromDatabase(data);
+            roads.forEach(function(road) {
+                $("#roadSelection").append("<option value='" + road+"'>"+road+"</option>");
+            });
+        });
+
+    }
+
+    function createUrl(host, name) {
+        return "http://" + host +"/road?name=" +name;
+    }
+
+
+</script>
+</body>
+</html>
